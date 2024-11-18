@@ -1,40 +1,41 @@
 package model;
 
 /**
- * Represents an Indy Winner record.
+ * Represents an IndyWinner entity with id, name, and year attributes.
  */
 public class IndyWinner {
-    // Fields for ID, name, and year of the winner
-    private int id;
-    private String name;
-    private int year;
+    private int id; // Unique identifier for the Indy winner
+    private String name; // Name of the Indy winner
+    private int year; // Year of the Indy win
 
-    // Getter for the 'id' field
+    // Constructor to initialize all fields
+    public IndyWinner(int id, String name, int year) {
+        this.id = id;
+        this.name = name;
+        this.year = year;
+    }
+
+    // Getters and setters for accessing and modifying private fields
     public int getId() {
         return id;
     }
 
-    // Setter for the 'id' field
     public void setId(int id) {
         this.id = id;
     }
 
-    // Getter for the 'name' field
     public String getName() {
         return name;
     }
 
-    // Setter for the 'name' field
     public void setName(String name) {
         this.name = name;
     }
 
-    // Getter for the 'year' field
     public int getYear() {
         return year;
     }
 
-    // Setter for the 'year' field
     public void setYear(int year) {
         this.year = year;
     }

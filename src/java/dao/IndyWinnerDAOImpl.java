@@ -2,107 +2,96 @@ package dao;
 
 import model.IndyWinner;
 import util.DBConnectionUtil;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implementation of the IndyWinnerDAO interface using JDBC.
+ * Implementation of IndyWinnerDAO interface for database operations.
  */
 public class IndyWinnerDAOImpl implements IndyWinnerDAO {
-    private Connection conn; // Connection to the database
+    private final Connection conn; // Connection to the database
 
-    // Constructor to initialize the database connection
+    // Constructor to establish a database connection
     public IndyWinnerDAOImpl() {
-        conn = DBConnectionUtil.getConnection();
+        conn = DBConnectionUtil.getConnection(); // Initialize the connection from DBConnectionUtil
+    }
+
+    // Constructor for testing with mocked Connection (dependency injection)
+    public IndyWinnerDAOImpl(Connection conn) {
+        this.conn = conn; // This constructor is for testing purposes
     }
 
     @Override
     public List<IndyWinner> getAllIndyWinners() {
         List<IndyWinner> winners = new ArrayList<>();
-        String sql = "SELECT * FROM indywinners"; // SQL query to retrieve all IndyWinner records
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                // Create and populate an IndyWinner object
-                IndyWinner winner = new IndyWinner();
-                winner.setId(rs.getInt("id"));
-                winner.setName(rs.getString("name"));
-                winner.setYear(rs.getInt("year"));
-                winners.add(winner); // Add the winner to the list
+        String query = "SELECT * FROM IndyWinners"; // SQL query to retrieve all records
+        try (PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) { // Iterate over each record
+                // Create an IndyWinner object and add it to the list
+                winners.add(new IndyWinner(rs.getInt("id"), rs.getString("name"), rs.getInt("year")));
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // Print stack trace for debugging
+            System.err.println("Database error occurred while fetching Indy winners: " + e.getMessage());
         }
-        return winners; // Return the list of winners
+        return winners;
     }
 
     @Override
     public IndyWinner getIndyWinnerById(int id) {
-        IndyWinner winner = null;
-        String sql = "SELECT * FROM indywinners WHERE id = ?"; // SQL query to retrieve a record by ID
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id); // Set the ID parameter in the query
+        String query = "SELECT * FROM IndyWinners WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                // Create and populate an IndyWinner object
-                winner = new IndyWinner();
-                winner.setId(rs.getInt("id"));
-                winner.setName(rs.getString("name"));
-                winner.setYear(rs.getInt("year"));
+                return new IndyWinner(rs.getInt("id"), rs.getString("name"), rs.getInt("year"));
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // Print stack trace for debugging
+            System.err.println("Database error occurred while fetching Indy winners: " + e.getMessage());
         }
-        return winner; // Return the found winner or null if no match is found
+        return null; // Return null if no record is found
     }
 
     @Override
     public boolean addIndyWinner(IndyWinner winner) {
-        boolean rowInserted = false;
-        String sql = "INSERT INTO indywinners (name, year) VALUES (?, ?)"; // SQL query to insert a new record
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String query = "INSERT INTO IndyWinners (name, year) VALUES (?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, winner.getName());
             stmt.setInt(2, winner.getYear());
-            rowInserted = stmt.executeUpdate() > 0; // Execute the update and check if a row was inserted
+            int rowsAffected = stmt.executeUpdate(); // Execute the update
+            return rowsAffected > 0; // Return true if insertion was successful
         } catch (SQLException e) {
-            e.printStackTrace(); // Print stack trace for debugging
+            System.err.println("Database error occurred while fetching Indy winners: " + e.getMessage());
         }
-        return rowInserted; // Return true if a row was inserted, false otherwise
+        return false;
     }
 
     @Override
     public boolean updateIndyWinner(IndyWinner winner) {
-        boolean rowUpdated = false;
-        String sql = "UPDATE indywinners SET name = ?, year = ? WHERE id = ?"; // SQL query to update a record
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String query = "UPDATE IndyWinners SET name = ?, year = ? WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, winner.getName());
             stmt.setInt(2, winner.getYear());
             stmt.setInt(3, winner.getId());
-            rowUpdated = stmt.executeUpdate() > 0; // Execute the update and check if a row was updated
+            int rowsAffected = stmt.executeUpdate(); // Execute the update
+            return rowsAffected > 0; // Return true if update was successful
         } catch (SQLException e) {
-            e.printStackTrace(); // Print stack trace for debugging
+            System.err.println("Database error occurred while fetching Indy winners: " + e.getMessage());
         }
-        return rowUpdated; // Return true if a row was updated, false otherwise
+        return false;
     }
 
     @Override
     public boolean deleteIndyWinner(int id) {
-        boolean rowDeleted = false;
-        String sql = "DELETE FROM indywinners WHERE id = ?"; // SQL query to delete a record
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id); // Set the ID parameter in the query
-            rowDeleted = stmt.executeUpdate() > 0; // Execute the update and check if a row was deleted
+        String query = "DELETE FROM IndyWinners WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, id);
+            int rowsAffected = stmt.executeUpdate(); // Execute the deletion
+            return rowsAffected > 0; // Return true if deletion was successful
         } catch (SQLException e) {
-            e.printStackTrace(); // Print stack trace for debugging
+            System.err.println("Database error occurred while fetching Indy winners: " + e.getMessage());
         }
-        return rowDeleted; // Return true if a row was deleted, false otherwise
+        return false;
     }
 }
